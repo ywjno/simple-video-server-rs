@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Video Player - {{VIDEO_ID}}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #000;
+        color: #fff;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .video-container {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      video {
+        width: 100%;
+        height: auto;
+        background: #000;
+      }
+      .info {
+        margin-top: 20px;
+        padding: 20px;
+        background: #333;
+        border-radius: 8px;
+      }
+      .video-id {
+        font-family: monospace;
+        color: #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="video-container">
+        <video controls preload="metadata">
+          <source
+            src="/api/watch?v={{VIDEO_ID}}"
+            type="application/x-mpegURL"
+          />
+          Your browser does not support HLS video playback.
+        </video>
+      </div>
+      <div class="info">
+        <h2>Video Player</h2>
+        <p>Video ID: <span class="video-id">{{VIDEO_ID}}</span></p>
+      </div>
+    </div>
+
+    <script>
+      // Check if browser supports HLS natively
+      const video = document.querySelector("video");
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        // Native HLS support (Safari)
+        console.log("Native HLS support detected");
+      } else {
+        // Try to load hls.js for other browsers
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/hls.js@latest";
+        script.onload = function () {
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource("/api/watch?v={{VIDEO_ID}}");
+            hls.attachMedia(video);
+            console.log("HLS.js loaded successfully");
+          } else {
+            console.error("HLS is not supported in this browser");
+            video.innerHTML =
+              '<p style="color: red;">HLS playbook not supported in this browser. Please use VLC or another HLS-compatible player.</p>';
+          }
+        };
+        document.head.appendChild(script);
+      }
+    </script>
+  </body>
+</html>
